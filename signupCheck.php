@@ -1,16 +1,21 @@
 <?php
-include ('smtp/PHPMailerAutoload.php');
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
 
 session_start();
-include ('dbsconnection.php');
+include "dbs.php";
 
 function sendemail_verify($fullName, $userEmail, $verify_token)
 {
-  
+    // Load Composer's autoloader
+    require __DIR__ . '/../PHPMailer/src/Exception.php';
+    require __DIR__ . '/../PHPMailer/src/PHPMailer.php';
+    require __DIR__ . '/../PHPMailer/src/SMTP.php';
 
-   
     // Create an instance; passing `true` enables exceptions
-    $mail = new PHPMailer();
+    $mail = new PHPMailer(true);
     $mail->isSMTP();                                            // Send using SMTP
     $mail->SMTPAuth   = true;                                   // Enable SMTP authentication
 
@@ -34,7 +39,8 @@ function sendemail_verify($fullName, $userEmail, $verify_token)
         <h2>You have Registered with Academic Research Portal</h2>
         <p>Please Click the link given to verify your account</p>
         <br/><br/>
-        <a href='https://caacademic.website//verification.php?token=$verify_token'>Click me to verify</a>
+        //PALITAN MO FILE PATH MO DITO
+        <a href='http://localhost/digital%20Archiving/userRegister/verification.php?token=$verify_token'>Click me to verify</a>
     ";
 
     $mail->Body    = $email_template;
@@ -55,7 +61,8 @@ if (isset($_POST['fullName']) || isset($_POST['userEmail']) || isset($_POST['pas
     $re_pass = $_POST['confirmPassword'];
     $verify_token = md5(rand());
 
-    // Check if email already exists in the database
+    // Check if email already exists in the database 
+    // PALITAN MO DATABASE
     $check_mail_query = "SELECT userEmail FROM registered_users WHERE userEmail='$userEmail' LIMIT 1";
     $check_mail_query_run = mysqli_query($conn, $check_mail_query);
 
@@ -83,6 +90,7 @@ if (isset($_POST['fullName']) || isset($_POST['userEmail']) || isset($_POST['pas
         } else {
             // Hash the password
             $password = password_hash($password, PASSWORD_DEFAULT);
+          
             $query = "INSERT INTO registered_users (fullName, userEmail, password, verify_token) VALUES (?, ?, ?, ?)";
             $stmt = mysqli_prepare($conn, $query);
             mysqli_stmt_bind_param($stmt, "ssss", $fullName, $userEmail, $password, $verify_token);
